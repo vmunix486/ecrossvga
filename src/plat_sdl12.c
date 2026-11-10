@@ -120,11 +120,11 @@ void _drawpixel_fast(int x, int y, int color) {
         SDL_UnlockSurface(screen);
 }
 
-void _drawhline(int x1, int x2, int y, int c) {
+void _drawhline_fast(int x1, int x2, int y, int c) {
     while (x1 <= x2) _drawpixel_fast(x1++, y, c);
 }
 
 void fill_rect(int x1, int y1, int x2, int y2, int c) {
-    while (y1 <= y2) _drawhline(x1, x2, y1++, c);
+    while (y1 <= y2) _drawhline_fast(x1, x2, y1++, c);
     SDL_UpdateRect(screen, 0, 0, 0, 0);
 }
