@@ -48,7 +48,10 @@ void graphics_close(void) {
     SDL_FreeSurface(screen);
 }
 
-void __putpixel(int x, int y, Uint32 pixel) {
+/* Modified from here:
+ * https://www.libsdl.org/release/SDL-1.2.15/docs/html/guidevideo.html#AEN93 
+ * -vmunix */
+void _putpixel(int x, int y, Uint32 pixel) {
     int bpp = screen->format->BytesPerPixel;
     /* Here p is the address to the pixel we want to set */
     Uint8 *p = (Uint8 *)screen->pixels + y * screen->pitch + x * bpp;
@@ -80,7 +83,7 @@ void __putpixel(int x, int y, Uint32 pixel) {
     }
 }
 
-Uint32 __hex2rgb(unsigned long color) {
+Uint32 _hex2rgb(unsigned long color) {
     Uint8 r,g,b;
     r = (color >> 16) & 0xFF;
     g = (color >>  8) & 0xFF;
@@ -97,7 +100,7 @@ void drawpixel(int x, int y, int color) {
     }
 
     if (colors == 16)
-        __putpixel(x, y, __hex2rgb(stcolors[color]));
+        _putpixel(x, y, _hex2rgb(stcolors[color]));
 
     if (SDL_MUSTLOCK(screen))
         SDL_UnlockSurface(screen);
@@ -114,7 +117,7 @@ void _drawpixel_fast(int x, int y, int color) {
     }
 
     if (colors == 16)
-        __putpixel(x, y, __hex2rgb(stcolors[color]));
+        _putpixel(x, y, _hex2rgb(stcolors[color]));
 
     if (SDL_MUSTLOCK(screen))
         SDL_UnlockSurface(screen);
