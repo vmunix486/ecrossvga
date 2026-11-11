@@ -2,9 +2,13 @@
 #include "graphics.h"
 
 int main(int argc, char *argv[]) {
-	int x,y;long c = 0;
+	int x,y,m;long c = 0;
 
-	graphics_open(VGA_640x480x16);
+	if (argc > 1) 	m = strtoi(argv[1], 16);
+	else			m = VGA_640x480x16;
+
+	if (graphics_open(m) != 0)
+		return 1;
 
 	for (x = 0; x != SCREENWIDTH; x++)
 		for (y = 0; y != SCREENHEIGHT; y++)

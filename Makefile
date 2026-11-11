@@ -1,4 +1,4 @@
-OS=mingw32
+OS=posix
 PLAT=sdl12
 
 ifeq ($(OS), mingw32)
@@ -27,10 +27,13 @@ strtoi: src/strtoi.c
 clean:
 	rm -fv build/*
 
-examples: vgatest colorap
+examples: vgatest colorap cgapalettes
 
 vgatest: examples/vgatest.c
 	$(CC) $(CFLAGS) -Isrc examples/vgatest.c -o build/vgatest -Lbuild -lecrossvga $(LDFLAGS)
 
 colorap: examples/colorap.c
 	$(CC) $(CFLAGS) -Isrc examples/colorap.c -o build/colorap -Lbuild -lecrossvga $(LDFLAGS)
+
+cgapalettes: examples/cgapalettes.c 
+	$(CC) $(CFLAGS) -Isrc examples/cgapalettes.c -o build/cgapalettes -Lbuild -lecrossvga $(LDFLAGS)

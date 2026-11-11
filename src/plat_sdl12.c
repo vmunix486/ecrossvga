@@ -3,15 +3,30 @@
 
 SDL_Surface *screen;
 int SCREENWIDTH,SCREENHEIGHT,VGA;
-unsigned long bwcolors[2] = {
+unsigned short colors,fast,grey,palette;
+
+unsigned int bwcolors[2] = {
 	0x000000, 0xFFFFFF
 };
-unsigned long stcolors[16] = {
+
+unsigned int cgacolors[4][4] = {
+    { 0x00000, 0x00AA00, 0xAA0000, 0xAA5500 }, /* Palette 0, Low intensity  */
+    { 0x00000, 0x55FF55, 0xFF5555, 0xFFFF55 }, /* Palette 0, High intensity */
+    { 0x00000, 0x00AAAA, 0xAA00AA, 0xAAAAAA }, /* Palette 1, Low intensity  */
+    { 0x00000, 0x55FFFF, 0xFF55FF, 0xFFFFFF }  /* Palette 1, High intensity */
+};
+
+unsigned int fsgcolors[4] = { /* CGA 4 shades of grey */
+    0x000000, 0x555555,
+    0xAAAAAA, 0xFFFFFF
+};
+
+unsigned int stcolors[16] = {
     0x000000, 0x0000AA, 0x00AA00, 0x00AAAA,
     0xAA0000, 0xAA00AA, 0xAA5500, 0xAAAAAA,
     0x555555, 0x5555FF, 0x55FF55, 0x55FFFF,
     0xFF5555, 0xFF55FF, 0xFFFF55, 0xFFFFFF
-}; unsigned short colors;
+};
 
 int graphics_open(int mode) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -21,14 +36,27 @@ int graphics_open(int mode) {
     }
 
     switch(mode) {
-	case CGA_640x200x2:
-		SCREENWIDTH =640;
-		SCREENHEIGHT=200;
-		colors = 2;
-		screen = SDL_SetVideoMode(640, 200, 8, SDL_SWSURFACE);
+        case CGA_320x200x4:
+            SCREENWIDTH =320;
+            SCREENHEIGHT=200;
+            colors = 4; palette = 1;
+            screen = SDL_SetVideoMode(320, 200, 8, SDL_SWSURFACE);
+            break;
+        case CGA_320x200x4G:
+            SCREENWIDTH =320;
+            SCREENHEIGHT=200;
+            colors = 4; grey = 1;
+            screen = SDL_SetVideoMode(320, 200, 8, SDL_SWSURFACE);
+            break;
+        case CGA_640x200x2:
+            SCREENWIDTH =640;
+            SCREENHEIGHT=200;
+            colors = 2;
+            screen = SDL_SetVideoMode(640, 200, 8, SDL_SWSURFACE);
+            break;
         case VGA_640x480x16:
             SCREENWIDTH =640;
-            SCREENHEIGHT=350;
+            SCREENHEIGHT=480;
             colors = 16;
             screen = SDL_SetVideoMode(640, 480, 8, SDL_SWSURFACE);
             break;
@@ -54,9 +82,8 @@ int graphics_open(int mode) {
     return 0;
 }
 
-void graphics_close(void) {
-    SDL_FreeSurface(screen);
-}
+void graphics_close(void){SDL_FreeSurface(screen);}
+void vga_init(void){graphics_open(VGA_640x480x16);}
 
 /* Modified from here:
  * https://www.libsdl.org/release/SDL-1.2.15/docs/html/guidevideo.html#AEN93 
@@ -101,7 +128,7 @@ Uint32 _hex2rgb(unsigned long color) {
     return SDL_MapRGB(screen->format, r, g, b);
 }
 
-void drawpixel(int x, int y, int color) {
+void _drawpixel(int x, int y, int color, int f) {
     if (SDL_MUSTLOCK(screen)) {
         if (SDL_LockSurface(screen) < 0) {
             fprintf(stderr, "Can't lock screen: %s\n", SDL_GetError());
@@ -111,41 +138,49 @@ void drawpixel(int x, int y, int color) {
 
     switch (colors) {
 	    case 2:
-		_putpixel(x, y, _hex2rgb(bwcolors[color%2])); break;
+		    _putpixel(x, y, _hex2rgb(bwcolors[color%2])); break;
+        case 4:
+            if (grey == 1) {
+                 _putpixel(x, y, _hex2rgb(fsgcolors[color%4]));
+                 break;
+            } else {
+                _putpixel(x, y, _hex2rgb(cgacolors[palette][color%4])); 
+                break;
+            }
 	    case 16:
-		_putpixel(x, y, _hex2rgb(stcolors[color%16])); break;
+		    _putpixel(x, y, _hex2rgb(stcolors[color%16])); break;
     }
 
     if (SDL_MUSTLOCK(screen))
         SDL_UnlockSurface(screen);
 
-    SDL_UpdateRect(screen, 0, 0, 0, 0);
+    if (f != 1) SDL_UpdateRect(screen, 0, 0, 0, 0);
 }
 
-void _drawpixel_fast(int x, int y, int color) {
-    if (SDL_MUSTLOCK(screen)) {
-        if (SDL_LockSurface(screen) < 0) {
-            fprintf(stderr, "Can't lock screen: %s\n", SDL_GetError());
-            return;
-        }
-    }
-
-    switch (colors) {
-	case 2:
-		_putpixel(x, y, _hex2rgb(bwcolors[color%2])); break;
-	case 16:
-	        _putpixel(x, y, _hex2rgb(stcolors[color%16])); break;
-    }
-
-    if (SDL_MUSTLOCK(screen))
-        SDL_UnlockSurface(screen);
-}
+void drawpixel(int x, int y, int color){_drawpixel(x, y, color, 0);}
+void _drawpixel_fast(int x, int y, int color){_drawpixel(x, y, color, 1);}
 
 void _drawhline_fast(int x1, int x2, int y, int c) {
     while (x1 <= x2) _drawpixel_fast(x1++, y, c);
+}
+
+void _drawvline_fast(int x, int y1, int y2, int c) {
+    while (y1 <= y2) _drawpixel_fast(x, y1++, c);
+}
+
+void drawvline(int x, int y1, int y2, int c) {
+    _drawvline_fast(x, y1, y2, c);
+    SDL_UpdateRect(screen, 0, 0, 0, 0);
+}
+
+void drawhline(int x1, int x2, int y, int c) {
+    _drawhline_fast(x1, x2, y, c);
+    SDL_UpdateRect(screen, 0, 0, 0, 0);
 }
 
 void fill_rect(int x1, int y1, int x2, int y2, int c) {
     while (y1 <= y2) _drawhline_fast(x1, x2, y1++, c);
     SDL_UpdateRect(screen, 0, 0, 0, 0);
 }
+
+void switchpalette(int p){palette = p;}
