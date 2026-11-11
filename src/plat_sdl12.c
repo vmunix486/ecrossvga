@@ -41,6 +41,8 @@ int graphics_open(int mode) {
         return -1;
     }
 
+    SDL_WM_SetCaption("ecrossvga", NULL);
+
     return 0;
 }
 

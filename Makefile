@@ -1,6 +1,11 @@
+OS=mingw32
 PLAT=sdl12
 
-CC=gcc
+ifeq ($(OS), mingw32)
+	CC=i686-w64-mingw32-gcc
+else ifeq ($(OS), posix)
+	CC=gcc
+endif
 AR=ar
 CFLAGS=-O3 -Wall -Wextra -ansi -pedantic
 ifeq ($(PLAT), sdl12)
