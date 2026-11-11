@@ -2,6 +2,10 @@
 #ifndef _GRAPHICS_H_
 #define _GRAPHICS_H_
 /* supported graphics modes in graphics_open */
+#define CGA_320x200x4	    0x04
+#define CGA_320x200x4G	    0x05 /* Grayscale */
+#define CGA_640x200x2	    0x06 /* B/W */
+
 #define VGA_640x350x16      0x10        /* 640x350 16 color/4bpp */
 #define VGA_640x480x16      0x12        /* 640x480 16 color/4bpp */
 #define PAL_320x200x256     0x13        /* 320x200 256 color/8bpp */

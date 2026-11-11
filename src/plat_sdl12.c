@@ -3,6 +3,9 @@
 
 SDL_Surface *screen;
 int SCREENWIDTH,SCREENHEIGHT,VGA;
+unsigned long bwcolors[2] = {
+	0x000000, 0xFFFFFF
+};
 unsigned long stcolors[16] = {
     0x000000, 0x0000AA, 0x00AA00, 0x00AAAA,
     0xAA0000, 0xAA00AA, 0xAA5500, 0xAAAAAA,
@@ -18,6 +21,11 @@ int graphics_open(int mode) {
     }
 
     switch(mode) {
+	case CGA_640x200x2:
+		SCREENWIDTH =640;
+		SCREENHEIGHT=200;
+		colors = 2;
+		screen = SDL_SetVideoMode(640, 200, 8, SDL_SWSURFACE);
         case VGA_640x480x16:
             SCREENWIDTH =640;
             SCREENHEIGHT=350;
@@ -101,8 +109,12 @@ void drawpixel(int x, int y, int color) {
         }
     }
 
-    if (colors == 16)
-        _putpixel(x, y, _hex2rgb(stcolors[color]));
+    switch (colors) {
+	    case 2:
+		_putpixel(x, y, _hex2rgb(bwcolors[color])); break;
+	    case 16:
+		_putpixel(x, y, _hex2rgb(stcolors[color])); break;
+    }
 
     if (SDL_MUSTLOCK(screen))
         SDL_UnlockSurface(screen);
@@ -118,8 +130,12 @@ void _drawpixel_fast(int x, int y, int color) {
         }
     }
 
-    if (colors == 16)
-        _putpixel(x, y, _hex2rgb(stcolors[color]));
+    switch (colors) {
+	case 2:
+		_putpixel(x, y, _hex2rgb(bwcolors[color])); break;
+	case 16:
+	        _putpixel(x, y, _hex2rgb(stcolors[color])); break;
+    }
 
     if (SDL_MUSTLOCK(screen))
         SDL_UnlockSurface(screen);
