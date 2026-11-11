@@ -111,9 +111,9 @@ void drawpixel(int x, int y, int color) {
 
     switch (colors) {
 	    case 2:
-		_putpixel(x, y, _hex2rgb(bwcolors[color])); break;
+		_putpixel(x, y, _hex2rgb(bwcolors[color%2])); break;
 	    case 16:
-		_putpixel(x, y, _hex2rgb(stcolors[color])); break;
+		_putpixel(x, y, _hex2rgb(stcolors[color%16])); break;
     }
 
     if (SDL_MUSTLOCK(screen))
@@ -132,9 +132,9 @@ void _drawpixel_fast(int x, int y, int color) {
 
     switch (colors) {
 	case 2:
-		_putpixel(x, y, _hex2rgb(bwcolors[color])); break;
+		_putpixel(x, y, _hex2rgb(bwcolors[color%2])); break;
 	case 16:
-	        _putpixel(x, y, _hex2rgb(stcolors[color])); break;
+	        _putpixel(x, y, _hex2rgb(stcolors[color%16])); break;
     }
 
     if (SDL_MUSTLOCK(screen))

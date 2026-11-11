@@ -27,7 +27,10 @@ strtoi: src/strtoi.c
 clean:
 	rm -fv build/*
 
-examples: vgatest
+examples: vgatest colorap
 
 vgatest: examples/vgatest.c
 	$(CC) $(CFLAGS) -Isrc examples/vgatest.c -o build/vgatest -Lbuild -lecrossvga $(LDFLAGS)
+
+colorap: examples/colorap.c
+	$(CC) $(CFLAGS) -Isrc examples/colorap.c -o build/colorap -Lbuild -lecrossvga $(LDFLAGS)
